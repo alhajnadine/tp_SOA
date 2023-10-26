@@ -22,6 +22,29 @@ class MyHandler(FileSystemEventHandler):
         print("Un fichier a été ajouté : " + event.src_path)
         # Invoquez l'opération SOAP pour notifier la création du fichier
 
+        client= Client('http://localhost:8002/ExtractionInformationIE?wsdl')
+        reponse= client.service.ExtractionInformationIE(event.src_path)
+       
+
+        RevenueMens=reponse.RevenueMens
+        DepenseMens=reponse.DepenseMens
+        client2= Client('http://localhost:8003/Solvabilite?wsdl')
+        reponse2=client2.service.Solvabilite(RevenueMens,DepenseMens)
+        print(reponse2)
+
+        TypeBatiment= reponse.TypeBatiment
+        NbrEtage=reponse.NbrEtage
+        TypeQuartier =reponse.TypeQuartier
+        client3= Client('http://localhost:8004/Prop?wsdl')
+        reponse3=client3.service.Prop(TypeBatiment,NbrEtage,TypeQuartier)
+        print(reponse3)
+
+        client4= Client('http://localhost:8005/Decision?wsdl')
+        reponse4= client4.service.Decision(reponse2,reponse3)
+        print(reponse4)
+
+
+
 def start_file_watcher():
     print("Écoute en cours...")
     event_handler = MyHandler()
